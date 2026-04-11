@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap');
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+/* Professional SaaS Font */
+
+:root {
+  background-color: #ffffff;
+  color: #1a1a1a;
+}
+
+body {
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  overflow: hidden;
+}
+
+/* Global Transitions */
+.panel-transition {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Invisible Scrollbars */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* SPINNER CSS - From Uiverse.io by satyamchaudharydev */
+.spinner {
+ --size: 40px;
+ --first-block-clr: #77BEF0;
+ --second-block-clr: #EA5B6F;
+ width: 100px;
+ height: 100px;
+ position: relative;
+}
+
+.spinner::after,.spinner::before {
+ box-sizing: border-box;
+ position: absolute;
+ content: "";
+ width: var(--size);
+ height: var(--size);
+ top: 50%;
+ animation: up 2.4s cubic-bezier(0, 0, 0.24, 1.21) infinite;
+ left: 50%;
+ background: var(--first-block-clr);
+ border-radius: 8px;
+}
+
+.spinner::after {
+ background: var(--second-block-clr);
+ top: calc(50% - var(--size));
+ left: calc(50% - var(--size));
+ animation: down 2.4s cubic-bezier(0, 0, 0.24, 1.21) infinite;
+}
+
+@keyframes down {
+ 0%, 100% { transform: none; }
+ 25% { transform: translateX(100%); }
+ 50% { transform: translateX(100%) translateY(100%); }
+ 75% { transform: translateY(100%); }
+}
+
+@keyframes up {
+ 0%, 100% { transform: none; }
+ 25% { transform: translateX(-100%); }
+ 50% { transform: translateX(-100%) translateY(-100%); }
+ 75% { transform: translateY(-100%); }
+}
+
+/* SaaS Primary Button */
+.btn-saas {
+ padding: 1.1em 2.5em;
+ background: none;
+ border: 2.5px solid #000;
+ font-size: 16px;
+ color: #000000;
+ cursor: pointer;
+ position: relative;
+ overflow: hidden;
+ transition: all 0.3s;
+ border-radius: 14px;
+ background-color: #FFCB61;
+ font-weight: 900;
+ box-shadow: 0 4px 0 0 #000;
+ text-transform: uppercase;
+ letter-spacing: 1px;
+ display: inline-flex;
+ align-items: center;
+ gap: 8px;
+}
+
+.btn-saas:before {
+ content: "";
+ position: absolute;
+ width: 120px;
+ height: 120%;
+ background-color: #EA5B6F;
+ top: 50%;
+ transform: skewX(30deg) translate(-150%, -50%);
+ transition: all 0.5s;
+}
+
+.btn-saas:hover {
+ background-color: #77BEF0;
+ color: #fff;
+ box-shadow: 0 4px 0 0 #000;
+ transform: translateY(-2px);
+}
+
+.btn-saas:hover::before {
+ transform: skewX(30deg) translate(150%, -50%);
+ transition-delay: 0.1s;
+}
+
+.btn-saas:active {
+ transform: translateY(2px) scale(0.95);
+ box-shadow: 0 0px 0 0 #000;
+}
