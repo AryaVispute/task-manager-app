@@ -24,6 +24,3 @@ A clean and minimal full-stack task manager built using React and Supabase.
    VITE_SUPABASE_ANON_KEY=your_key
 4. Run project:
    npm run dev
-
-# Note
-"We value clarity, correctness, and sensible trade-offs."
