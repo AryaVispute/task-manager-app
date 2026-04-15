@@ -1,13 +1,18 @@
 import { useState, useEffect, useMemo } from 'react'
 import toast, { Toaster } from 'react-hot-toast'
-import { getTasks, addTask, updateTask, deleteTask } from './services/api'
+import { supabase } from './services/supabaseClient'
+import { getTasks, addTask, updateTask, deleteTask, getUserProfile, signOut } from './services/api'
 import TaskInventory from './components/TaskInventory'
 import TaskTimeline from './components/TaskTimeline'
 import DashboardHeader from './components/DashboardHeader'
 import LandingScreen from './components/LandingScreen'
 import ConfirmModal from './components/ConfirmModal'
+import Auth from './components/Auth'
 
 function App() {
+  const [session, setSession] = useState(null)
+  const [userRole, setUserRole] = useState(null) // null means loading role
+  const [userEmail, setUserEmail] = useState(null)
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -22,6 +27,39 @@ function App() {
   const brandColors = ['#77BEF0', '#FFCB61', '#FF894F', '#EA5B6F']
 
   useEffect(() => {
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+      if (session) {
+        fetchRole(session.user.id)
+        setUserEmail(session.user.email)
+      } else {
+        setUserRole('user') // No session means default role
+      }
+    })
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+      if (session) {
+        fetchRole(session.user.id)
+        setUserEmail(session.user.email)
+      } else {
+        setTasks([]) // Clear tasks on logout
+        setUserRole('user')
+        setUserEmail(null)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const fetchRole = async (userId) => {
+    const profile = await getUserProfile(userId)
+    setUserRole(profile.role)
+  }
+
+  useEffect(() => {
     if (entryStage === 'splash') {
       const timer = setTimeout(() => setEntryStage('landing'), 3000)
       return () => clearTimeout(timer)
@@ -29,13 +67,15 @@ function App() {
   }, [entryStage])
 
   useEffect(() => {
-    fetchTasks()
-  }, [])
+    if (session && userRole) {
+      fetchTasks()
+    }
+  }, [session, userRole])
 
   const fetchTasks = async () => {
     try {
       setLoading(true)
-      const data = await getTasks()
+      const data = await getTasks(userRole === 'admin')
       setTasks(data)
       setError(null)
     } catch (err) {
@@ -44,6 +84,7 @@ function App() {
       setLoading(false)
     }
   }
+
 
   const tasksThisMonth = useMemo(() => {
     const now = new Date()
@@ -133,9 +174,31 @@ function App() {
     }
   }
 
+  const handleLogout = async () => {
+    try {
+      await signOut()
+      toast.success('Logged out successfully')
+    } catch (err) {
+      toast.error('Error logging out')
+    }
+  }
+
   if (entryStage !== 'app') {
     return <LandingScreen stage={entryStage} onStart={() => setEntryStage('app')} />
   }
+
+  if (!session) {
+    return (
+      <Auth 
+        onAuthSuccess={async () => {
+          const { data: { session: newSession } } = await supabase.auth.getSession()
+          setSession(newSession)
+          if (newSession) fetchRole(newSession.user.id)
+        }} 
+      />
+    )
+  }
+
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center py-10 px-6 overflow-hidden">
@@ -148,7 +211,11 @@ function App() {
         onCancel={() => setDeleteModal({ isOpen: false, taskId: null })}
       />
 
-      <DashboardHeader tasksThisMonth={tasksThisMonth} />
+      <DashboardHeader 
+        tasksThisMonth={tasksThisMonth} 
+        onLogout={handleLogout} 
+        userRole={userRole} 
+      />
 
       <main className="w-full max-w-7xl bg-white border-[3px] border-gray-100 rounded-[3rem] shadow-[0_32px_96px_-16px_rgba(0,0,0,0.1)] flex h-[78vh] overflow-hidden relative">
         <TaskInventory 
@@ -164,6 +231,8 @@ function App() {
           onToggle={handleToggleTask}
           onUpdateTitle={handleUpdateTitle}
           onDelete={handleDeleteClick}
+          userRole={userRole}
+          currentUserId={session?.user?.id}
         />
 
         <TaskTimeline 
@@ -177,8 +246,11 @@ function App() {
           onToggleTask={handleToggleTask}
           onDeleteClick={handleDeleteClick}
           brandColors={brandColors}
+          userRole={userRole}
+          currentUserId={session?.user?.id}
         />
       </main>
+
     </div>
   )
 }

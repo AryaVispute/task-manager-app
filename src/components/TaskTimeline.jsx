@@ -11,7 +11,9 @@ const TaskTimeline = ({
   timelineTasks,
   onToggleTask,
   onDeleteClick,
-  brandColors
+  brandColors,
+  userRole,
+  currentUserId
 }) => {
   return (
     <section 
@@ -65,6 +67,16 @@ const TaskTimeline = ({
               [...timelineTasks].reverse().map((task, idx) => {
                 const themeColor = task.completed ? '#4B5563' : brandColors[idx % brandColors.length];
                 const tintColor = themeColor + '15'; // 10% opacity
+                const isOwner = task.user_id === currentUserId;
+                const isAdmin = userRole === 'admin';
+
+                // Get owner email and truncate it
+                const ownerEmail = task.profiles?.email || 'Guest'
+                const truncateEmail = (email) => {
+                  if (!email || email === 'Guest') return 'Guest'
+                  const [name, domain] = email.split('@')
+                  return `${name}@${domain.substring(0, 2)}...`
+                }
                 
                 return (
                   <div key={task.id} className="relative flex items-start group">
@@ -72,29 +84,43 @@ const TaskTimeline = ({
                          style={{ backgroundColor: themeColor }}></div>
                     
                     <div 
-                      onClick={() => onToggleTask(task.id, !task.completed)}
-                      className="ml-16 flex-1 p-4 rounded-[1.5rem] border-2 border-gray-100 transition-all hover:shadow-md group-hover:-translate-y-0.5 relative cursor-pointer"
+                      onClick={() => (isOwner || isAdmin) && onToggleTask(task.id, !task.completed)}
+                      className={`ml-16 flex-1 p-4 rounded-[1.5rem] border-2 border-gray-100 transition-all hover:shadow-md group-hover:-translate-y-0.5 relative ${isOwner || isAdmin ? 'cursor-pointer' : 'cursor-default'}`}
                       style={{ backgroundColor: tintColor, borderBottomWidth: '2px', borderBottomColor: themeColor }}
                     >
                       <div className="flex justify-between items-center mb-1">
-                        <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: themeColor }}>
-                          {task.completed ? 'COMPLETED' : 'IN PROGRESS'}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: themeColor }}>
+                            {task.completed ? 'COMPLETED' : 'IN PROGRESS'}
+                          </span>
+                          {!isOwner && isAdmin && (
+                            <span className="bg-white/60 text-gray-500 text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md border border-gray-200/50">
+                              Guest
+                            </span>
+                          )}
+                        </div>
                         <div className="flex items-center gap-3">
                           <span className="text-[10px] font-bold text-gray-500 italic">
                             {new Date(task.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); onDeleteClick(task.id); }} 
-                            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-black/5 rounded-lg text-brand-red transition-all duration-300"
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6"/></svg>
-                          </button>
+                          {(isOwner || isAdmin) && (
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); onDeleteClick(task.id); }} 
+                              className="opacity-0 group-hover:opacity-100 p-1 hover:bg-black/5 rounded-lg text-brand-red transition-all duration-300"
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6"/></svg>
+                            </button>
+                          )}
                         </div>
                       </div>
-                      <h3 className={`text-base font-bold ${task.completed ? 'text-gray-500 line-through' : 'text-black'}`}>
+                      <h3 className={`text-[15px] font-bold ${task.completed ? 'text-gray-500 line-through' : 'text-black'}`}>
                         {task.title}
                       </h3>
+                      {isAdmin && (
+                        <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-tight">
+                          Owner: <span className="text-gray-500">{isOwner ? 'You' : truncateEmail(ownerEmail)}</span>
+                        </p>
+                      )}
                     </div>
                   </div>
                 )

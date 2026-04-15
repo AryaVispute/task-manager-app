@@ -1,14 +1,63 @@
 import { supabase } from './supabaseClient'
 
 /**
- * Fetch all tasks ordered by createdAt desc
+ * AUTH FUNCTIONS
  */
-export const getTasks = async () => {
+
+export const signUp = async (email, password) => {
+  const { data, error } = await supabase.auth.signUp({ email, password })
+  if (error) throw error
+  return data
+}
+
+export const signIn = async (email, password) => {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+  if (error) throw error
+  return data
+}
+
+export const signOut = async () => {
+  const { error } = await supabase.auth.signOut()
+  if (error) throw error
+}
+
+export const getUserProfile = async (userId) => {
   try {
     const { data, error } = await supabase
+      .from('profiles')
+      .select('role, email')
+      .eq('id', userId)
+      .single()
+    
+    if (error) throw error
+    return data
+  } catch (error) {
+    console.error('Error fetching profile:', error.message)
+    return { role: 'user', email: null } // Default to user on error
+  }
+}
+
+/**
+ * TASK CRUD FUNCTIONS
+ */
+
+export const getTasks = async (isAdmin = false) => {
+  try {
+    // We join with the profiles table to get the owner's identifier (email)
+    let query = supabase
       .from('tasks')
-      .select('*')
-      .order('createdAt', { ascending: false })
+      .select(`
+        *,
+        profiles (
+          email
+        )
+      `)
+    
+    // RLS handles the filtering automatically!
+    // If the user is an admin, the 'Admins full access' policy kicks in.
+    // If they are a regular user, 'Users access own tasks' kicks in.
+    
+    const { data, error } = await query.order('createdAt', { ascending: false })
 
     if (error) throw error
     return data
@@ -18,14 +67,15 @@ export const getTasks = async () => {
   }
 }
 
-/**
- * Insert new task
- */
+
 export const addTask = async (title) => {
   try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
+
     const { data, error } = await supabase
       .from('tasks')
-      .insert([{ title, completed: false }])
+      .insert([{ title, completed: false, user_id: user.id }])
       .select()
 
     if (error) throw error
@@ -36,9 +86,6 @@ export const addTask = async (title) => {
   }
 }
 
-/**
- * Update task fields (completed, title, etc.)
- */
 export const updateTask = async (id, updates) => {
   try {
     const { data, error } = await supabase
@@ -55,9 +102,6 @@ export const updateTask = async (id, updates) => {
   }
 }
 
-/**
- * Delete task
- */
 export const deleteTask = async (id) => {
   try {
     const { error } = await supabase
@@ -72,3 +116,4 @@ export const deleteTask = async (id) => {
     throw error
   }
 }
+

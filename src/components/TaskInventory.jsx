@@ -13,7 +13,9 @@ const TaskInventory = ({
   error,
   onToggle,
   onUpdateTitle,
-  onDelete
+  onDelete,
+  userRole,
+  currentUserId
 }) => {
   return (
     <section 
@@ -69,6 +71,8 @@ const TaskInventory = ({
             onToggle={onToggle}
             onUpdateTitle={onUpdateTitle}
             onDelete={onDelete}
+            currentUserId={currentUserId}
+            userRole={userRole}
           />
         </div>
       )}

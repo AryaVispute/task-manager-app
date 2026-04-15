@@ -1,7 +1,7 @@
 
 import TaskItem from './TaskItem'
 
-const TaskList = ({ tasks, loading, error, onToggle, onUpdateTitle, onDelete }) => {
+const TaskList = ({ tasks, loading, error, onToggle, onUpdateTitle, onDelete, userRole, currentUserId }) => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center">
@@ -21,21 +21,27 @@ const TaskList = ({ tasks, loading, error, onToggle, onUpdateTitle, onDelete }) 
   }
 
   if (tasks.length === 0) {
+    const isAdmin = userRole === 'admin'
     return (
-      <div className="text-center p-16 bg-cream/30 rounded-[2.5rem] border-4 border-dashed border-pink-light/40">
+      <div className="text-center p-16 bg-cream/30 rounded-[2.5rem] border-4 border-dashed border-gray-100/50">
         <div className="mb-6 mx-auto w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-lg transform -rotate-6">
-           <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FF90BB" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+           <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={isAdmin ? "#77BEF0" : "#FF90BB"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 20h9" />
             <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
           </svg>
         </div>
-        <p className="text-gray-700 text-2xl font-black mb-2">No tasks yet</p>
+        <p className="text-gray-700 text-2xl font-black mb-2">
+          {isAdmin ? 'No tasks found' : 'Your list is clear'}
+        </p>
         <p className="text-gray-400 font-semibold max-w-xs mx-auto leading-relaxed">
-          Your journey to clarity starts here. Add a task above to begin!
+          {isAdmin 
+            ? "The platform's database is currently empty. All user workspaces are clear!" 
+            : "Your journey to clarity starts here. Add a task above to begin!"}
         </p>
       </div>
     )
   }
+
 
   return (
     <div className="space-y-4 max-h-[60vh] overflow-y-auto no-scrollbar pr-2">
@@ -46,10 +52,13 @@ const TaskList = ({ tasks, loading, error, onToggle, onUpdateTitle, onDelete }) 
           onToggle={onToggle}
           onUpdateTitle={onUpdateTitle}
           onDelete={onDelete}
+          userRole={userRole}
+          currentUserId={currentUserId}
         />
       ))}
     </div>
   )
 }
+
 
 export default TaskList
