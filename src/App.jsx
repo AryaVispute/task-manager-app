@@ -9,8 +9,10 @@ import LandingScreen from './components/LandingScreen'
 import ConfirmModal from './components/ConfirmModal'
 import NamePromptModal from './components/NamePromptModal'
 import Auth from './components/Auth'
+import AdminTaskManager from './components/AdminTaskManager'
 
 function App() {
+
   const [session, setSession] = useState(null)
   const [userRole, setUserRole] = useState(null) // null means loading role
   const [userName, setUserName] = useState(null)
@@ -262,38 +264,53 @@ function App() {
 
 
       <main className="w-full max-w-7xl bg-white border-[3px] border-gray-100 rounded-[3rem] shadow-[0_32px_96px_-16px_rgba(0,0,0,0.1)] flex h-[78vh] overflow-hidden relative">
-        <TaskInventory 
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          filter={filter}
-          setFilter={setFilter}
-          leftCollapsed={leftCollapsed}
-          setLeftCollapsed={setLeftCollapsed}
-          filteredTasks={leftFilteredTasks}
-          loading={loading}
-          error={error}
-          onToggle={handleToggleTask}
-          onUpdateTitle={handleUpdateTitle}
-          onDelete={handleDeleteClick}
-          userRole={userRole}
-          currentUserId={session?.user?.id}
-        />
+        {userRole === 'admin' ? (
+          <AdminTaskManager 
+            tasks={tasks}
+            loading={loading}
+            error={error}
+            onToggle={handleToggleTask}
+            onUpdateTitle={handleUpdateTitle}
+            onDelete={handleDeleteClick}
+            currentUserId={session?.user?.id}
+          />
+        ) : (
+          <>
+            <TaskInventory 
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              filter={filter}
+              setFilter={setFilter}
+              leftCollapsed={leftCollapsed}
+              setLeftCollapsed={setLeftCollapsed}
+              filteredTasks={leftFilteredTasks}
+              loading={loading}
+              error={error}
+              onToggle={handleToggleTask}
+              onUpdateTitle={handleUpdateTitle}
+              onDelete={handleDeleteClick}
+              userRole={userRole}
+              currentUserId={session?.user?.id}
+            />
 
-        <TaskTimeline 
-          rightCollapsed={rightCollapsed}
-          setRightCollapsed={setRightCollapsed}
-          onAddTask={handleAddTask}
-          weekDates={weekDates}
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-          timelineTasks={timelineTasks}
-          onToggleTask={handleToggleTask}
-          onDeleteClick={handleDeleteClick}
-          brandColors={brandColors}
-          userRole={userRole}
-          currentUserId={session?.user?.id}
-        />
+            <TaskTimeline 
+              rightCollapsed={rightCollapsed}
+              setRightCollapsed={setRightCollapsed}
+              onAddTask={handleAddTask}
+              weekDates={weekDates}
+              selectedDate={selectedDate}
+              setSelectedDate={setSelectedDate}
+              timelineTasks={timelineTasks}
+              onToggleTask={handleToggleTask}
+              onDeleteClick={handleDeleteClick}
+              brandColors={brandColors}
+              userRole={userRole}
+              currentUserId={session?.user?.id}
+            />
+          </>
+        )}
       </main>
+
 
     </div>
   )

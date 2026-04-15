@@ -61,22 +61,26 @@ export const updateProfileName = async (userId, name) => {
 
 export const getTasks = async (isAdmin = false) => {
   try {
-    // We join with the profiles table to get the owner's identifier (email)
+    console.log('Fetching tasks. Admin Mode:', isAdmin)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
+
     let query = supabase
       .from('tasks')
       .select(`
         *,
         profiles (
           name,
-          email
+          email,
+          role
         )
       `)
 
-    
-    // RLS handles the filtering automatically!
-    // If the user is an admin, the 'Admins full access' policy kicks in.
-    // If they are a regular user, 'Users access own tasks' kicks in.
-    
+    // Manual filtering for extra safety (Double-Lock)
+    if (!isAdmin) {
+      query = query.eq('user_id', user.id)
+    }
+
     const { data, error } = await query.order('createdAt', { ascending: false })
 
     if (error) throw error
@@ -86,6 +90,7 @@ export const getTasks = async (isAdmin = false) => {
     throw error
   }
 }
+
 
 
 export const addTask = async (title) => {
