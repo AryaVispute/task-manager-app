@@ -1,6 +1,5 @@
 
-
-const LandingScreen = ({ stage, onStart }) => {
+const LandingPage = ({ stage, onStart }) => {
   // Splash Stage: White background with small centered spinner
   if (stage === 'splash') {
     return (
@@ -63,4 +62,4 @@ const LandingScreen = ({ stage, onStart }) => {
   )
 }
 
-export default LandingScreen
+export default LandingPage

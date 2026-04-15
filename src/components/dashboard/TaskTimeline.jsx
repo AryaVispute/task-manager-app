@@ -1,7 +1,8 @@
-
 import AddTask from './AddTask'
+import { formatDate } from '../../utils/dateUtils'
 
 const TaskTimeline = ({
+
   rightCollapsed,
   setRightCollapsed,
   onAddTask,
@@ -112,8 +113,9 @@ const TaskTimeline = ({
                         </div>
                         <div className="flex items-center gap-3">
                           <span className="text-[10px] font-bold text-gray-500 italic">
-                            {new Date(task.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {formatDate(task.createdAt)}
                           </span>
+
                           {(isOwner || isAdmin) && (
                             <button 
                               onClick={(e) => { e.stopPropagation(); onDeleteClick(task.id); }} 

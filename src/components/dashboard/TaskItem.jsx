@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { formatDate } from '../../utils/dateUtils'
 
 const TaskItem = ({ task, onToggle, onUpdateTitle, onDelete, userRole, currentUserId }) => {
   const [isEditing, setIsEditing] = useState(false)
@@ -34,14 +35,6 @@ const TaskItem = ({ task, onToggle, onUpdateTitle, onDelete, userRole, currentUs
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') handleSave()
     if (e.key === 'Escape') handleCancel()
-  }
-
-  const formatDate = (dateString) => {
-    if (!dateString) return ''
-    const date = new Date(dateString)
-    const day = date.toLocaleDateString([], { day: 'numeric', month: 'short' })
-    const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-    return `${day}, ${time}`
   }
 
   return (

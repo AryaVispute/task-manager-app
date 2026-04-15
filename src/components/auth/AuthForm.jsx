@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { signIn, signUp } from '../services/api'
+import { signIn, signUp } from '../../services/api'
 import toast from 'react-hot-toast'
 
-const Auth = ({ onAuthSuccess }) => {
+const AuthForm = ({ onAuthSuccess }) => {
   const [isLogin, setIsLogin] = useState(true)
   const [showVerification, setShowVerification] = useState(false)
   const [email, setEmail] = useState('')
@@ -41,20 +41,16 @@ const Auth = ({ onAuthSuccess }) => {
           if (onAuthSuccess) onAuthSuccess()
         }
         else {
-          // This case should ideally not be hit if Supabase behavior is consistent
           toast.success('Account created! Please sign in.')
           setIsLogin(true)
         }
       }
     } catch (error) {
-      console.error('Authentication Error:', error)
       toast.error(error.message || 'Authentication failed')
     } finally {
       setLoading(false)
     }
   }
-
-
 
   if (showVerification) {
     return (
@@ -166,4 +162,4 @@ const Auth = ({ onAuthSuccess }) => {
   )
 }
 
-export default Auth
+export default AuthForm
