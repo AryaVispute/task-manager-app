@@ -70,13 +70,19 @@ const TaskTimeline = ({
                 const isOwner = task.user_id === currentUserId;
                 const isAdmin = userRole === 'admin';
 
-                // Get owner email and truncate it
-                const ownerEmail = task.profiles?.email || 'Guest'
-                const truncateEmail = (email) => {
-                  if (!email || email === 'Guest') return 'Guest'
-                  const [name, domain] = email.split('@')
-                  return `${name}@${domain.substring(0, 2)}...`
+                const ownerProfile = task.profiles
+                
+                const getOwnerDisplay = () => {
+                  if (isOwner) return 'You'
+                  if (ownerProfile?.name) return ownerProfile.name
+                  if (ownerProfile?.email) {
+                    const [emailName, domain] = ownerProfile.email.split('@')
+                    return `${emailName}@${domain.substring(0, 2)}...`
+                  }
+                  return 'Guest'
                 }
+
+                const ownerName = getOwnerDisplay()
                 
                 return (
                   <div key={task.id} className="relative flex items-start group">
@@ -93,9 +99,14 @@ const TaskTimeline = ({
                           <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: themeColor }}>
                             {task.completed ? 'COMPLETED' : 'IN PROGRESS'}
                           </span>
-                          {!isOwner && isAdmin && (
+                          {!isOwner && (
                             <span className="bg-white/60 text-gray-500 text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md border border-gray-200/50">
-                              Guest
+                              {ownerName}
+                            </span>
+                          )}
+                          {isOwner && (
+                            <span className="bg-white/60 text-brand-blue text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md border border-brand-blue/20">
+                              You
                             </span>
                           )}
                         </div>
@@ -116,14 +127,10 @@ const TaskTimeline = ({
                       <h3 className={`text-[15px] font-bold ${task.completed ? 'text-gray-500 line-through' : 'text-black'}`}>
                         {task.title}
                       </h3>
-                      {isAdmin && (
-                        <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-tight">
-                          Owner: <span className="text-gray-500">{isOwner ? 'You' : truncateEmail(ownerEmail)}</span>
-                        </p>
-                      )}
                     </div>
                   </div>
                 )
+
               })
             ) : (
               <div className="flex flex-col items-center justify-center py-24 animate-in fade-in zoom-in duration-1000">

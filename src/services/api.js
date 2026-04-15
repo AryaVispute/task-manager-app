@@ -25,7 +25,7 @@ export const getUserProfile = async (userId) => {
   try {
     const { data, error } = await supabase
       .from('profiles')
-      .select('role, email')
+      .select('role, email, name')
       .eq('id', userId)
       .single()
     
@@ -33,9 +33,27 @@ export const getUserProfile = async (userId) => {
     return data
   } catch (error) {
     console.error('Error fetching profile:', error.message)
-    return { role: 'user', email: null } // Default to user on error
+    return { role: 'user', email: null, name: null } 
   }
 }
+
+export const updateProfileName = async (userId, name) => {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ name })
+      .eq('id', userId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  } catch (error) {
+    console.error('Error updating profile name:', error.message)
+    throw error
+  }
+}
+
 
 /**
  * TASK CRUD FUNCTIONS
@@ -49,9 +67,11 @@ export const getTasks = async (isAdmin = false) => {
       .select(`
         *,
         profiles (
+          name,
           email
         )
       `)
+
     
     // RLS handles the filtering automatically!
     // If the user is an admin, the 'Admins full access' policy kicks in.

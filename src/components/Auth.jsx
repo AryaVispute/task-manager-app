@@ -16,6 +16,11 @@ const Auth = ({ onAuthSuccess }) => {
       return
     }
 
+    if (password.length < 6) {
+      toast.error('Password must be at least 6 characters')
+      return
+    }
+
     setLoading(true)
     try {
       if (isLogin) {
@@ -36,18 +41,19 @@ const Auth = ({ onAuthSuccess }) => {
           if (onAuthSuccess) onAuthSuccess()
         }
         else {
-          toast.success('Account created! Logging you in...')
-          // Fallback: try sign-in immediately if signUp worked but didn't return session
-          await signIn(email, password)
-          if (onAuthSuccess) onAuthSuccess()
+          // This case should ideally not be hit if Supabase behavior is consistent
+          toast.success('Account created! Please sign in.')
+          setIsLogin(true)
         }
       }
     } catch (error) {
+      console.error('Authentication Error:', error)
       toast.error(error.message || 'Authentication failed')
     } finally {
       setLoading(false)
     }
   }
+
 
 
   if (showVerification) {
