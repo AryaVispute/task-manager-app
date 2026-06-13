@@ -1,0 +1,29 @@
+services:
+  # The name of our service
+  flowdo-app:
+    # Build configuration
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Passing environment variables from your local .env file to the Docker build process
+      args:
+        - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+        - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+    
+    # Name of the final image on Docker Hub
+    image: aryavispute/flowdo:latest
+    
+    # Container name when running
+    container_name: flowdo_container
+    
+    # Port mapping: HostPort:ContainerPort
+    # We map port 8080 on your computer to port 80 inside the container
+    ports:
+      - "8080:80"
+    
+    # Restart policy
+    restart: always
+
+    # Use the .env file to populate the variables used in the 'args' section above
+    env_file:
+      - .env
